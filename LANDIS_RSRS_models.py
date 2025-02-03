@@ -2,10 +2,10 @@ import numpy as np
 import os
 
 # GitHub repository path
-output_dir = "LandIS/RSR_functions"
+output_dir = "RSR_functions"
 os.makedirs(output_dir, exist_ok=True)
 
-# Define Landsat Next Bands (CWV in microns)
+# Landsat Next Bands (CWV in microns)
 bands = {
     "Violet": 0.412, "Coastal_Aerosol": 0.442, "Blue": 0.490, "Green": 0.560, "Yellow": 0.600,
     "Orange": 0.620, "Red_1": 0.650, "Red_2": 0.665, "Red_Edge_1": 0.705, "Red_Edge_2": 0.740,
