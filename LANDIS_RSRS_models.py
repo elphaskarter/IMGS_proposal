@@ -2,9 +2,7 @@ import numpy as np
 import os
 
 # GitHub repository path
-# github_repo = "TPW_algorithm"  
-# output_dir = os.path.join(github_repo, "Landsat_Next_RSR")
-output_dir = "IMGS_proposal/Landsat_Next_RSR"
+output_dir = "LandIS/RSR_functions"
 os.makedirs(output_dir, exist_ok=True)
 
 # Define Landsat Next Bands (CWV in microns)
