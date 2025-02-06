@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+This code prepares tape5 for reanalysis data in MODTRAN card2
 Created on Fri Sep 23 28:35:02 2024
 @author: KHATA ELPHAS
 """
