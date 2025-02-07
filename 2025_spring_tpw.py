@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import glob
 
+# read tape7.scn
 def tape7scn(file_path):
     data = {'WAVLEN MCRN': [], 'GRND RFLT': [], 'TOTAL RAD': []}
     
@@ -27,6 +28,13 @@ def tape7scn(file_path):
                 data['TOTAL RAD'].append(total_rad)
     
     return data
+
+# apparent reflectance
+def apprnt_reflectance(L_TOA, E_SUN, THETA_SUN, DOY):
+    d = 1 - 0.01672 * np.cos(2*np.pi*(DOY-4)/365)
+    THETA_SUN_rad = np.radians(THETA_SUN)
+    rho_app = (np.pi * L_TOA * d**2) / (E_SUN * np.cos(THETA_SUN_rad))
+    return rho_app
 
 def process_directory(base_dir):
     all_data = []
