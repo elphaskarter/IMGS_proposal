@@ -11,23 +11,35 @@ import pandas as pd
 import glob
 
 # read tape7.scn
-def tape7scn(file_path):
-    data = {'WAVLEN MCRN': [], 'GRND RFLT': [], 'TOTAL RAD': []}
-    
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
+def getModtranData(run):
+    file_path = os.path.join(run, 'tape7.scn')
+    with open(file_path) as fp:
+        step1 = fp.readlines()
+        activate = False
+        data = []
+        labels = []
         
-        for line in lines[11:]:  # Start from line 12 (index 11)
-            wavlen_mcrn = line[4:13].strip()  # Columns 5-13
-            grnd_rflt = line[75:86].strip()   # Columns 76-86
-            total_rad = line[97:108].strip()  # Columns 98-108
-            
-            if wavlen_mcrn and grnd_rflt and total_rad:
-                data['WAVLEN MCRN'].append(wavlen_mcrn)
-                data['GRND RFLT'].append(grnd_rflt)
-                data['TOTAL RAD'].append(total_rad)
-    
-    return data
+        for line in step1:
+            if "WAVLEN" in line:
+                activate = True
+                labels = re.split(r'\s{2,}', line.strip())  # Split on 2+ spaces
+                
+                # Remove unwanted labels safely
+                for unwanted in ['THRML SCT', 'DEPTH']:
+                    if unwanted in labels:
+                        labels.remove(unwanted)
+                
+            elif activate:
+                if line.strip() == '-9999.':
+                    activate = False
+                    continue
+                else:
+                    data.append(line.strip().split())
+
+        data2 = np.float32(data)
+        runData = {label: data2[:, i] for i, label in enumerate(labels)}
+        
+    return runData
 
 # apparent reflectance
 def apprnt_reflectance(L_TOA, E_SUN, THETA_SUN, DOY):
