@@ -115,23 +115,36 @@ def process_tape7_scn(main_dir):
             dir_names = [os.path.basename(p) for p in paths.values()]
             print(f"Error processing {profile} pair: {', '.join(dir_names)}")
             print(f"Error details: {str(e)}")
-    
+
     return profile_dfs, accessed_folders
 
-# map folders_accessed to the folders in the MODTRAN_models_2025_b and read the tape6 in the folders_accessed
-def reaTape6(main_dir, folders_accessed):
+def reaTape6(main_dir, folders):
     extracted_data = {}
 
-    for folder in folders_accessed:
+    for folder in folders:
         tape6_path = os.path.join(main_dir, folder, 'tape6')
-        with open(tape6_path, 'r') as fP:
-            lines = fP.readlines()
-            line_89 = lines[88].strip()
-            extracted_data[folder] = line_89[5:]
+        if not os.path.exists(tape6_path):
+            print(f"File not found: {tape6_path}")
+            continue  # Skip this folder
+
+        try:
+            with open(tape6_path, 'r') as fP:
+                lines = fP.readlines()
+                print(f"Content of {tape6_path}:")
+                print(lines)  # Debugging: Print file content
+
+                if len(lines) > 88:  # Ensure the file has at least 89 lines
+                    line_89 = lines[88].strip()
+                    print(f"Line 89: {line_89}")  # Debugging: Print line 89
+                    extracted_data[folder] = line_89[5:]  # Extract data from column 6 onwards
+                else:
+                    print(f"File {tape6_path} does not have enough lines.")
+        except Exception as e:
+            print(f"Error processing {tape6_path}: {e}")
 
     return extracted_data
 
 # Main
 main_dir = 'MODTRAN_models_2025_b'
 profile_dataframes, folders_accessed = process_tape7_scn(main_dir)
-tape6Data = reaTape6(main_dir, folders_accessed)
+# tape6Data = reaTape6(main_dir, folders_accessed)
