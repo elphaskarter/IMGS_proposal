@@ -11,7 +11,7 @@ import re
 import pandas as pd
 from pathlib import Path
 
-# apparent reflectance
+# Apparent reflectance
 def apprnt_reflectance(L_TOA, E_SUN, THETA_SUN, DOY):
     d = 1 - 0.01672 * np.cos(2*np.pi*(DOY-4)/365)
     THETA_SUN_rad = np.radians(THETA_SUN)
@@ -48,14 +48,12 @@ def getModtranData(run):
         
     return runData
 
-def process_all_profiles(main_dir):
-    # Dictionary to hold DataFrames keyed by profile name
+# Process all profiles for tape7.scn
+def process_tape7_scn(main_dir):
     profile_dfs = {}
-    
-    # Group directories by profile and water vapor
     profile_groups = {}
+    accessed_folders = []
     
-    # Walk through directory tree
     for root, dirs, files in os.walk(main_dir):
         for dir_name in dirs:
             # Match pattern: PROFILE_ALBx_WATy.y (e.g., "MLS_ALB0_WAT0.2")
@@ -64,8 +62,7 @@ def process_all_profiles(main_dir):
                 profile, alb, wvp = match.groups()
                 wvp = float(wvp)  # Convert to numeric
                 
-                # Create grouping key
-                key = (profile, wvp)
+                key = (profile, wvp) # Create grouping key
                 
                 # Initialize group if new
                 if key not in profile_groups:
@@ -94,17 +91,13 @@ def process_all_profiles(main_dir):
         try:
             # Load ALB0 data (TOTAL_RAD)
             alb0_data = getModtranData(paths['ALB0'])
-            alb0_df = pd.DataFrame({
-                'WAVLEN_MCRN': alb0_data['WAVLEN MCRN'],
-                'TOTAL_RAD': alb0_data['TOTAL RAD']
-            })
+            alb0_df = pd.DataFrame({'WAVLEN_MCRN': alb0_data['WAVLEN MCRN'],
+                'TOTAL_RAD': alb0_data['TOTAL RAD']})
             
             # Load ALB1 data (GRND_RFLCT)
             alb1_data = getModtranData(paths['ALB1'])
-            alb1_df = pd.DataFrame({
-                'WAVLEN_MCRN': alb1_data['WAVLEN MCRN'],
-                'GRND_RFLCT': alb1_data['GRND RFLT']
-            })
+            alb1_df = pd.DataFrame({'WAVLEN_MCRN': alb1_data['WAVLEN MCRN'],
+                'GRND_RFLCT': alb1_data['GRND RFLT']})
             
             # Merge on wavelength
             merged = pd.merge(alb0_df, alb1_df, on='WAVLEN_MCRN', how='inner')
@@ -118,30 +111,34 @@ def process_all_profiles(main_dir):
                 profile_dfs[profile] = merged
             else:
                 profile_dfs[profile] = pd.concat([profile_dfs[profile], merged])
+            
+            # successfully accessed folders
+            accessed_folders.append(f"{profile}_ALB0_WAT{wvp:.1f}")
+            accessed_folders.append(f"{profile}_ALB1_WAT{wvp:.1f}")
                 
         except Exception as e:
             dir_names = [os.path.basename(p) for p in paths.values()]
             print(f"Error processing {profile} pair: {', '.join(dir_names)}")
             print(f"Error details: {str(e)}")
     
-    return profile_dfs
+    return profile_dfs, accessed_folders
 
-# Example usage
-main_dir = 'MODTRAL_models_2025'
-profile_dataframes = process_all_profiles(main_dir)
+# Main
+main_dir = 'MODTRAL_models_2025_b'
+profile_dataframes, folders_accessed = process_tape7_scn(main_dir)
 
-# Report here
-if not profile_dataframes:
-    print("No valid atmospheric profiles found!")
-else:
-    # Process all profiles
-    for profile_name, df in profile_dataframes.items():
-        # 1. Save to CSV
-        filename = f"{profile_name}_atmospheric_profile.csv"
-        df.to_csv(filename, index=False)
+# # Report here
+# if not profile_dataframes:
+#     print("No valid atmospheric profiles found!")
+# else:
+#     # Process all profiles
+#     for profile_name, df in profile_dataframes.items():
+#         # 1. Save to CSV
+#         filename = f"{profile_name}_atmospheric_profile.csv"
+#         df.to_csv(filename, index=False)
         
-        # 2. Access DataFrame for analysis
-        print(f"\nProfile: {profile_name}")
-        print(f"Data Shape: {df.shape}")
-        print(df)
+#         # 2. Access DataFrame for analysis
+#         print(f"\nProfile: {profile_name}")
+#         print(f"Data Shape: {df.shape}")
+#         print(df)
         
