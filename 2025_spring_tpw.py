@@ -61,14 +61,9 @@ def process_tape7_scn(main_dir):
             if match:
                 profile, alb, wvp = match.groups()
                 wvp = float(wvp)  # Convert to numeric
-                
                 key = (profile, wvp) # Create grouping key
-                
-                # Initialize group if new
                 if key not in profile_groups:
                     profile_groups[key] = {'ALB0': None, 'ALB1': None}
-                
-                # Store path by albedo type
                 run_path = os.path.join(root, dir_name)
                 profile_groups[key][f'ALB{alb}'] = run_path
 
@@ -123,22 +118,20 @@ def process_tape7_scn(main_dir):
     
     return profile_dfs, accessed_folders
 
-# Main
-main_dir = 'MODTRAL_models_2025_b'
-profile_dataframes, folders_accessed = process_tape7_scn(main_dir)
+# map folders_accessed to the folders in the MODTRAN_models_2025_b and read the tape6 in the folders_accessed
+def reaTape6(main_dir, folders_accessed):
+    extracted_data = {}
 
-# # Report here
-# if not profile_dataframes:
-#     print("No valid atmospheric profiles found!")
-# else:
-#     # Process all profiles
-#     for profile_name, df in profile_dataframes.items():
-#         # 1. Save to CSV
-#         filename = f"{profile_name}_atmospheric_profile.csv"
-#         df.to_csv(filename, index=False)
-        
-#         # 2. Access DataFrame for analysis
-#         print(f"\nProfile: {profile_name}")
-#         print(f"Data Shape: {df.shape}")
-#         print(df)
-        
+    for folder in folders_accessed:
+        tape6_path = os.path.join(main_dir, folder, 'tape6')
+        with open(tape6_path, 'r') as fP:
+            lines = fP.readlines()
+            line_89 = lines[88].strip()
+            extracted_data[folder] = line_89[5:]
+
+    return extracted_data
+
+# Main
+main_dir = 'MODTRAN_models_2025_b'
+profile_dataframes, folders_accessed = process_tape7_scn(main_dir)
+tape6Data = reaTape6(main_dir, folders_accessed)
