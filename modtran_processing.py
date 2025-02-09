@@ -11,13 +11,6 @@ import re
 import pandas as pd
 from pathlib import Path
 
-# Apparent reflectance
-def apprnt_reflectance(L_TOA, E_SUN, THETA_SUN, DOY):
-    d = 1 - 0.01672 * np.cos(2*np.pi*(DOY-4)/365)
-    THETA_SUN_rad = np.radians(THETA_SUN)
-    rho_app = (np.pi * L_TOA * d**2) / (E_SUN * np.cos(THETA_SUN_rad))
-    return rho_app
-
 # Process tape7.scn
 def getModtranData(run):
     file_path = os.path.join(run, 'tape7.scn')
@@ -112,10 +105,10 @@ def main(main_dir):
     return DATA_FRAME
 
 main_dir = 'MODTRAN_models_2025_b'
-DATA_FRAME = main(main_dir)
+MODTRAN_DATA_FRAME = main(main_dir)
 
 # Main execution
 if __name__ == "__main__":
-    for profile, df in DATA_FRAME.items():
+    for profile, df in MODTRAN_DATA_FRAME.items():
         print(f"Profile: {profile}")
         print(df.head())

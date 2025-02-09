@@ -50,7 +50,7 @@ def plot_spectra(data_frames):
         ax = [ax]
 
     for i, (sample_type, df) in enumerate(data_frames.items()):
-            ax[i].plot(df['wavelength'], df['reflectance'], label=f'{sample_type} Average', linestyle='-', linewidth=2)
+            ax[i].plot(df['wavelength'], df['reflectance'], label=f'{sample_type} Average', linestyle='dashed', linewidth=2)
             ax[i].set_xlabel('Wavelength (microns)', fontsize=12)
             ax[i].set_ylabel('Reflectance', fontsize=12)
             ax[i].set_title(f'{sample_type} Average Reflectance', fontsize=14)
@@ -77,7 +77,7 @@ for filename in ECOSTRESS_path():
 
 # Create DataFrames for each sample type
 dataframes = {}
-averages = {} # average reflectance per sample 
+AVG_SPEC_DATA_FRAME = {} # average reflectance per sample 
 for sample_type, samples in spectra_dict.items():
     df = pd.DataFrame()
     reflectance_values = []  # Store reflectance values for averaging
@@ -89,11 +89,10 @@ for sample_type, samples in spectra_dict.items():
     avg_reflectance = pd.DataFrame(reflectance_values).mean(axis=0)
     avg_df = pd.DataFrame({'wavelength': wave,  'reflectance': avg_reflectance})
     dataframes[sample_type] = df
-    averages[sample_type] = avg_df 
+    AVG_SPEC_DATA_FRAME[sample_type] = avg_df 
 
-plot_spectra(averages)
+plot_spectra(AVG_SPEC_DATA_FRAME)
 
 if __name__ == "__main__":
     pass
-
-
+# END
