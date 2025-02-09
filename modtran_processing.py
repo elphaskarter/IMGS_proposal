@@ -111,10 +111,11 @@ def main(main_dir):
         DATA_FRAME[profile] = df
     return DATA_FRAME
 
+main_dir = 'MODTRAN_models_2025_b'
+DATA_FRAME = main(main_dir)
+
 # Main execution
 if __name__ == "__main__":
-    main_dir = 'MODTRAN_models_2025_b'
-    PROFILES_DATA_FRAME = main(main_dir)
-    for profile, df in PROFILES_DATA_FRAME.items():
+    for profile, df in DATA_FRAME.items():
         print(f"Profile: {profile}")
-        print(df)
+        print(df.head())
