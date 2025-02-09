@@ -93,27 +93,28 @@ def readTape6(main_dir, folders_accessed):
         data_frame = pd.DataFrame(data, columns=["ATM_PROFILE", "INITIAL_H2O", "FINAL_H2O"])
     return data_frame
 
-# Main
-main_dir = 'MODTRAN_models_2025_b'
-profile_dataframes, folders_accessed = process_tape7_scn(main_dir)
-tape6Data = readTape6(main_dir, folders_accessed)
+def main(main_dir):
+    profile_dataframes, folders_accessed = process_tape7_scn(main_dir)
+    tape6Data = readTape6(main_dir, folders_accessed)
+    DATA_FRAME = {}
+    for profile, df in profile_dataframes.items():
+        df["INITIAL_H2O"] = df["INITIAL_H2O"].astype(float)
+        tape6Data["INITIAL_H2O"] = tape6Data["INITIAL_H2O"].astype(float)
+    for profile, df in profile_dataframes.items():
+        df["FINAL_H2O"] = np.nan  
+        
+        for i, row in tape6Data.iterrows():
+            matching_row = df[df["INITIAL_H2O"] == row["INITIAL_H2O"]]
+            if not matching_row.empty and row["ATM_PROFILE"] == profile:
+                final_h2o_value = float(row["FINAL_H2O"])  # Convert to float
+                df.loc[df["INITIAL_H2O"] == row["INITIAL_H2O"], "FINAL_H2O"] = final_h2o_value
+        DATA_FRAME[profile] = df
+    return DATA_FRAME
 
-# Ensure INITIAL_H2O is numeric
-tape6Data["INITIAL_H2O"] = pd.to_numeric(tape6Data["INITIAL_H2O"], errors="coerce")
-
-# Update FINAL_H2O column using merge
-ATM_DATA_FRAME = {}
-for profile, df in profile_dataframes.items():
-    if not df.empty:
-        # Merge with tape6Data
-        merged_df = df.merge(
-            tape6Data[["ATM_PROFILE", "INITIAL_H2O", "FINAL_H2O"]],
-            on=["ATM_PROFILE", "INITIAL_H2O"],
-            how="left"
-        )
-        # Update FINAL_H2O column
-        df["FINAL_H2O"] = merged_df["FINAL_H2O"]
-        ATM_DATA_FRAME[profile] = df
-
-
-
+# Main execution
+if __name__ == "__main__":
+    main_dir = 'MODTRAN_models_2025_b'
+    PROFILES_DATA_FRAME = main(main_dir)
+    for profile, df in PROFILES_DATA_FRAME.items():
+        print(f"Profile: {profile}")
+        print(df)
