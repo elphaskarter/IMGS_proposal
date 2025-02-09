@@ -118,50 +118,11 @@ def process_tape7_scn(main_dir):
 
     return profile_dfs, accessed_folders
 
-# def reaTape6(main_dir, folders_accessed):
-#     data = []
-
-#     for folder in folders_accessed:
-#         tape6_path = os.path.join(main_dir, folder, 'tape6')
-#         if not os.path.exists(tape6_path):
-#             print(f"Error: File not found - {tape6_path}")
-#             continue  # Skip this folder if file doesn't exist
-
-#         try:
-#             with open(tape6_path, 'r') as fP:
-#                 lines = fP.readlines()
-#                 if len(lines) > 88:  # Ensure the file has at least 89 lines
-#                     line_89 = lines[88].strip()
-
-#                     if line_89.startswith("FINAL:"):
-#                         final_h2o = line_89[10:19].strip()  # Extract characters from column 17-23
-#                     elif len(lines) > 86:
-#                         line_87 = lines[86].strip()
-#                         if "THE WATER COLUMN IS BEING SET TO THE MAXIMUM," in line_87[0:57]:  
-#                             final_h2o = line_87[48:56].strip()  # Extract data from column 55-66
-#                         else:
-#                             print(f"Error: Neither line 89 nor line 87 in {tape6_path} matched expected formats.")
-#                             continue
-#                     else:
-#                         print(f"Error: Insufficient lines in {tape6_path}.")
-#                         continue
-                    
-#                     data.append([folder, final_h2o])
-
-#         except Exception as e:
-#             print(f"Error processing {tape6_path}: {e}")
-
-#     # Convert list to DataFrame
-#     df = pd.DataFrame(data, columns=["ATM_PROFILE", "Final_H2O"])
-#     return df
-
 def reaTape6(main_dir, folders_accessed):
     data = []
-
     for folder in folders_accessed:
         tape6_path = os.path.join(main_dir, folder, 'tape6')
 
-        # Read the file
         with open(tape6_path, 'r') as fP:
             lines = fP.readlines()
             if len(lines) > 88 and lines[88].startswith("FINAL:"):
