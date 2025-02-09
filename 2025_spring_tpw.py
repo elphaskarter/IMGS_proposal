@@ -72,9 +72,9 @@ def process_tape7_scn(main_dir):
         
         missing = []
         if not paths['ALB0']:
-            missing.append(f"{profile}_ALB0_WAT{wvp:.1f}")
+            missing.append(f"{profile}_ALB0_WAT{wvp:.2f}")
         if not paths['ALB1']:
-            missing.append(f"{profile}_ALB1_WAT{wvp:.1f}")
+            missing.append(f"{profile}_ALB1_WAT{wvp:.2f}")
         
         if missing:
             error_msg = f"Skipping incomplete pair: Missing {', '.join(missing)}"
@@ -108,8 +108,8 @@ def process_tape7_scn(main_dir):
                 profile_dfs[profile] = pd.concat([profile_dfs[profile], merged])
             
             # successfully accessed folders
-            accessed_folders.append(f"{profile}_ALB0_WAT{wvp:.1f}")
-            accessed_folders.append(f"{profile}_ALB1_WAT{wvp:.1f}")
+            accessed_folders.append(f"{profile}_ALB0_WAT{wvp:.2f}")
+            accessed_folders.append(f"{profile}_ALB1_WAT{wvp:.2f}")
                 
         except Exception as e:
             dir_names = [os.path.basename(p) for p in paths.values()]
@@ -118,33 +118,63 @@ def process_tape7_scn(main_dir):
 
     return profile_dfs, accessed_folders
 
-def reaTape6(main_dir, folders):
-    extracted_data = {}
+# def reaTape6(main_dir, folders_accessed):
+#     data = []
 
-    for folder in folders:
+#     for folder in folders_accessed:
+#         tape6_path = os.path.join(main_dir, folder, 'tape6')
+#         if not os.path.exists(tape6_path):
+#             print(f"Error: File not found - {tape6_path}")
+#             continue  # Skip this folder if file doesn't exist
+
+#         try:
+#             with open(tape6_path, 'r') as fP:
+#                 lines = fP.readlines()
+#                 if len(lines) > 88:  # Ensure the file has at least 89 lines
+#                     line_89 = lines[88].strip()
+
+#                     if line_89.startswith("FINAL:"):
+#                         final_h2o = line_89[10:19].strip()  # Extract characters from column 17-23
+#                     elif len(lines) > 86:
+#                         line_87 = lines[86].strip()
+#                         if "THE WATER COLUMN IS BEING SET TO THE MAXIMUM," in line_87[0:57]:  
+#                             final_h2o = line_87[48:56].strip()  # Extract data from column 55-66
+#                         else:
+#                             print(f"Error: Neither line 89 nor line 87 in {tape6_path} matched expected formats.")
+#                             continue
+#                     else:
+#                         print(f"Error: Insufficient lines in {tape6_path}.")
+#                         continue
+                    
+#                     data.append([folder, final_h2o])
+
+#         except Exception as e:
+#             print(f"Error processing {tape6_path}: {e}")
+
+#     # Convert list to DataFrame
+#     df = pd.DataFrame(data, columns=["ATM_PROFILE", "Final_H2O"])
+#     return df
+
+def reaTape6(main_dir, folders_accessed):
+    data = []
+
+    for folder in folders_accessed:
         tape6_path = os.path.join(main_dir, folder, 'tape6')
-        if not os.path.exists(tape6_path):
-            print(f"File not found: {tape6_path}")
-            continue  # Skip this folder
 
-        try:
-            with open(tape6_path, 'r') as fP:
-                lines = fP.readlines()
-                print(f"Content of {tape6_path}:")
-                print(lines)  # Debugging: Print file content
+        # Read the file
+        with open(tape6_path, 'r') as fP:
+            lines = fP.readlines()
+            if len(lines) > 88 and lines[88].startswith("FINAL:"):
+                final_h2o = lines[88][10:19].strip()  # Extract from columns 11-19
+            elif len(lines) > 86 and "THE WATER COLUMN IS BEING SET TO THE MAXIMUM," in lines[86]:
+                final_h2o = lines[86][48:56].strip()  # Extract from columns 49-56
 
-                if len(lines) > 88:  # Ensure the file has at least 89 lines
-                    line_89 = lines[88].strip()
-                    print(f"Line 89: {line_89}")  # Debugging: Print line 89
-                    extracted_data[folder] = line_89[5:]  # Extract data from column 6 onwards
-                else:
-                    print(f"File {tape6_path} does not have enough lines.")
-        except Exception as e:
-            print(f"Error processing {tape6_path}: {e}")
+            data.append([folder, final_h2o])
 
-    return extracted_data
-
+    tape6_df = pd.DataFrame(data, columns=["ATM_PROFILE", "Final_H2O"])
+    return tape6_df
 # Main
 main_dir = 'MODTRAN_models_2025_b'
 profile_dataframes, folders_accessed = process_tape7_scn(main_dir)
-# tape6Data = reaTape6(main_dir, folders_accessed)
+tape6Data = reaTape6(main_dir, folders_accessed)
+tape6Data
