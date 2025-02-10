@@ -12,6 +12,15 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 from collections import defaultdict
+import contextlib
+import io
+
+# Suppress print statements
+with contextlib.redirect_stdout(io.StringIO()):
+    MODTRAN_DATA_FRAME  
+
+# Suppress plots
+plt.close('all')  # Close any open plots
 
 def ECOSTRESS_path():
     ecoDir = 'ecostress_download'
@@ -63,7 +72,7 @@ def plot_spectra(data_frames):
 # Read ECOSTRESS data
 mlw_df = MODTRAN_DATA_FRAME['MLW']
 modtran_wavelen = mlw_df.groupby('INITIAL_H2O')['WAVLEN_MCRN'].apply(list).to_dict()
-modtran_wavelen= list(modtran_wavelen.values())[0] # MODTRAN SPECTRUM
+modtran_wavelen= np.array(list(modtran_wavelen.values())[0]) # MODTRAN SPECTRUM
 
 spectra_dict = defaultdict(list)  # Initialize with defaultdict
 for filename in ECOSTRESS_path():
@@ -77,7 +86,7 @@ for filename in ECOSTRESS_path():
     sample_wave, sample_reflect = zip(*sorted_pairs)
     spectra_dict[sample_name].append((sample_wave, sample_reflect))
 
-# Create DataFrames for each sample type
+# DataFrames for each sample type
 dataframes = {}
 AVG_SPEC_DATA_FRAME = {} # average reflectance per sample 
 for sample_type, samples in spectra_dict.items():

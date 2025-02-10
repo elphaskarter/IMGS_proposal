@@ -1,9 +1,21 @@
+# L_TOA Analysis
 from MODTRAN_processing import MODTRAN_DATA_FRAME
 from ECOSTRESS_spectrum_processing import AVG_SPEC_DATA_FRAME
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import contextlib
+import io
+
+# Suppress print statements
+with contextlib.redirect_stdout(io.StringIO()):
+    MODTRAN_DATA_FRAME  
+    AVG_SPEC_DATA_FRAME
+
+# Suppress plots
+plt.close('all')  # Close any open plots
+
 
 def compute_L_toa(grouped_data):
     L_toa = {}
@@ -47,11 +59,11 @@ for profile, df in MODTRAN_DATA_FRAME.items():
     profile_dict[profile] = water_vapor_groups
     group_counts[profile] = len(water_vapor_groups) 
 
-for profile, groups in profile_dict.items():
-    print(f"Profile: {profile}")
-    for group_name, group_df in groups.items():
-        print(f"  Group: {group_name}")
-        print(group_df)
+# for profile, groups in profile_dict.items():
+#     print(f"Profile: {profile}")
+#     for group_name, group_df in groups.items():
+#         print(f"  Group: {group_name}")
+#         print(group_df)
 
 for profile, count in group_counts.items():
     print(f"Profile: {profile}, Total Groups: {count}")
@@ -72,14 +84,14 @@ for profile, groups in profile_dict.items():
         new_df.loc[:, 'water_reflect'] = water_reflectData
         GROUPED_MODTRAN_DATA[profile][group_name] = new_df
 
+L_TOA_DATA = compute_L_toa(GROUPED_MODTRAN_DATA)
+GROUPED_MODTRAN_DATA = add_L_TOA_cols(GROUPED_MODTRAN_DATA, L_TOA_DATA)
+
 for profile, groups in GROUPED_MODTRAN_DATA.items():
     print(f"Profile: {profile}")
     for group_name, group_df in groups.items():
         print(f"  Group: {group_name}")
         print(group_df)
-
-L_TOA_DATA = compute_L_toa(GROUPED_MODTRAN_DATA)
-GROUPED_MODTRAN_DATA = add_L_TOA_cols(GROUPED_MODTRAN_DATA, L_TOA_DATA)
 
 if __name__ == "__main__":
     pass
