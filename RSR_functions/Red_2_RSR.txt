@@ -1,4 +1,4 @@
-# Wavelength (µm)	RSR
+Wavelength	RSR
 0.3000	0.000000
 0.3013	0.000000
 0.3025	0.000000

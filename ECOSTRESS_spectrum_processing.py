@@ -7,7 +7,7 @@ Returns:
 """
 import numpy as np
 from scipy.interpolate import interp1d
-from modtran_processing import DATA_FRAME
+from MODTRAN_processing import MODTRAN_DATA_FRAME
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
@@ -38,7 +38,7 @@ def read_ECOSTRESS_data(file):
     return np.array(wav), np.array(reflect)
 
 def downsample(wav_micron, reflec, target_wav):
-    interp_func = interp1d(wav_micron, reflec, kind='nearest', bounds_error=False, fill_value=np.nan)
+    interp_func = interp1d(wav_micron, reflec, kind='linear', fill_value="extrapolate")
     dwnsmpl_val = interp_func(target_wav)
     return dwnsmpl_val
 
@@ -61,7 +61,9 @@ def plot_spectra(data_frames):
     plt.show()
 
 # Read ECOSTRESS data
-modtran_wavelen = DATA_FRAME['MLW']['WAVLEN_MCRN']
+mlw_df = MODTRAN_DATA_FRAME['MLW']
+modtran_wavelen = mlw_df.groupby('INITIAL_H2O')['WAVLEN_MCRN'].apply(list).to_dict()
+modtran_wavelen= list(modtran_wavelen.values())[0] # MODTRAN SPECTRUM
 
 spectra_dict = defaultdict(list)  # Initialize with defaultdict
 for filename in ECOSTRESS_path():

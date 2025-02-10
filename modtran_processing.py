@@ -110,5 +110,8 @@ MODTRAN_DATA_FRAME = main(main_dir)
 # Main execution
 if __name__ == "__main__":
     for profile, df in MODTRAN_DATA_FRAME.items():
+        csv_filename = f"{profile}_data.csv"
+        df.to_csv(csv_filename, index=False)
+        print(f"Saved {csv_filename}")
         print(f"Profile: {profile}")
-        print(df.head())
+        print(df)

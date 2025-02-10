@@ -1,27 +1,13 @@
-from MODTRAN_processing import MODTRAN_DATA_FRAME
-from ECOSTRESS_spectrum_processing import AVG_SPEC_DATA_FRAME
-from LANDIS_RSRS_processing import SENSOR_RSR_FRAME
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from LANDIS_RSRS_processing import SENSOR_RSR_FRAME, band_limits
 from scipy.interpolate import interp1d
+import numpy as np
+from L_TOA_processing import GROUPED_MODTRAN_DATA
+import os
 
-
-# Apparent reflectance
-def apprnt_reflectance(L_TOA, E_SUN, THETA_SUN, DOY):
-    d = 1 - 0.01672 * np.cos(2*np.pi*(DOY-4)/365)
-    THETA_SUN_rad = np.radians(THETA_SUN)
-    rho_app = (np.pi * L_TOA * d**2) / (E_SUN * np.cos(THETA_SUN_rad))
-    return rho_app
-
-def effect_reflect(mod_data, rsr_df, bands):
-    wl = mod_data['WAVLEN']
-    reflect = mod_data['TOT_TRANS']
-    rsr_wl = rsr_df['Wavelength']
-
-    eff_reflect = {}
+def band_effective_data(wl, reflect, rsr_wl, rsr_df, bands):
+    eff_val = {}
     for band, (min_wl, max_wl) in bands.items():
-        rsr = rsr_df[band]
+        rsr = rsr_df
         mask = (wl >= min_wl) & (wl <= max_wl)
         filt_wl = wl[mask]
         filt_trans = reflect[mask]
@@ -32,6 +18,18 @@ def effect_reflect(mod_data, rsr_df, bands):
         num = np.trapz(filt_trans * filt_rsr, filt_wl)
         denom = np.trapz(filt_rsr, filt_wl)
         eff_trans = np.round(num / denom, 3)
-        eff_reflect[band] = eff_trans
-    return eff_reflect
+        eff_val[band] = eff_trans
+    return eff_val
+
+def downsample(wav_micron, reflec, target_wav):
+    interp_func = interp1d(wav_micron, reflec, kind='linear', fill_value="extrapolate")
+    dwnsmpl_val = interp_func(target_wav)
+    return dwnsmpl_val
+
+output_dir = "solar_irradiance.txt"
+os.makedirs(output_dir, exist_ok=True)
+
+
+bands = {'NIR1': band_limits['NIR1'], 'Water_Vapor': band_limits['Water_Vapor'], 
+         'SWIR2a': band_limits['SWIR2a']}
 

@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-# GitHub repository path
+# repository path
 output_dir = "RSR_functions"
 os.makedirs(output_dir, exist_ok=True)
 
@@ -17,7 +17,7 @@ bands = {
     "TIR_3": 9.100, "TIR_4": 11.300, "TIR_5": 12.000
 }
 
-# Define threshold for band limits (1% of peak)
+# threshold for band limits (1% of peak)
 THRESHOLD = 0.01
 
 # Generate RSR data
@@ -25,8 +25,7 @@ sigma_values = {band: cwv * 0.05 for band, cwv in bands.items()}
 wavelengths = np.linspace(0.3, 13.0, 10000)
 
 rsr_data = {}
-band_limits = {}  # NEW: Store computed band limits
-
+band_limits = {}  
 for band, cwv in bands.items():
     sigma = sigma_values[band]
     rsr = np.exp(-((wavelengths - cwv) ** 2) / (2 * sigma ** 2))
@@ -40,22 +39,21 @@ for band, cwv in bands.items():
     # Save data
     file_path = os.path.join(output_dir, f"{band}_RSR.txt")
     with open(file_path, "w") as f:
-        f.write("# Wavelength (µm)\tRSR\n")
+        f.write("Wavelength\tRSR\n")
         for wl, rsr_val in zip(wavelengths, rsr):
             f.write(f"{wl:.4f}\t{rsr_val:.6f}\n")
     
-    df = pd.DataFrame({"Wavelength (µm)": wavelengths, "RSR": rsr})
+    df = pd.DataFrame({"Wavelength": wavelengths, "RSR": rsr})
     rsr_data[band] = df
 
 # Create subplots for Band 12, 13, and 15
 fig, ax = plt.subplots(1, 1, figsize=(15, 5))
 
 def get_trimmed_data(band_name):
-    """Slice wavelengths/RSR between left and right limits for a band."""
     left, right = band_limits[band_name]
     df = rsr_data[band_name]
-    mask = (df["Wavelength (µm)"] >= left) & (df["Wavelength (µm)"] <= right)
-    return df["Wavelength (µm)"][mask], df["RSR"][mask]
+    mask = (df["Wavelength"] >= left) & (df["Wavelength"] <= right)
+    return df["Wavelength"][mask], df["RSR"][mask]
 
 # Get trimmed data for plotting
 nir1_wave, nir1_rsr = get_trimmed_data("NIR1")
@@ -64,9 +62,9 @@ swir2a_wave, swir2_rsrs = get_trimmed_data("SWIR2a")
 
 # Dictionary of DataFrames (Band limits)
 SENSOR_RSR_FRAME = {
-    "NIR1": pd.DataFrame({"Wavelength (µm)": nir1_wave, "RSR": nir1_rsr }),
-    "Water_Vapor": pd.DataFrame({"Wavelength (µm)": water_vapor_wave, "RSR": water_vapor_rsr}),
-    "SWIR2a": pd.DataFrame({"Wavelength (µm)": swir2a_wave, "RSR": swir2_rsrs})
+    "NIR1": pd.DataFrame({"Wavelength": nir1_wave, "RSR": nir1_rsr }),
+    "Water_Vapor": pd.DataFrame({"Wavelength": water_vapor_wave, "RSR": water_vapor_rsr}),
+    "SWIR2a": pd.DataFrame({"Wavelength": swir2a_wave, "RSR": swir2_rsrs})
 }
 
 # Plot
